@@ -14,11 +14,7 @@ const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const mockCredentials = [
-    { email: "admin@learnsphere.com", password: "Admin@2026", role: "admin", redirect: "/admin-dashboard" },
-    { email: "instructor@learnsphere.com", password: "Instructor@2026", role: "instructor", redirect: "/admin-dashboard" },
-    { email: "learner@learnsphere.com", password: "Learner@2026", role: "learner", redirect: "/learner-courses-listing" }
-  ];
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
   const validateForm = () => {
     const newErrors = {};
@@ -62,21 +58,49 @@ const LoginForm = () => {
 
     setIsLoading(true);
 
-    setTimeout(() => {
-      const user = mockCredentials?.find(
-        cred => cred?.email === formData?.email && cred?.password === formData?.password
-      );
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email: formData?.email,
+          password: formData?.password
+        })
+      });
 
-      if (user) {
-        navigate(user?.redirect);
-      } else {
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const message = errorData?.detail || "Invalid email or password. Please check your credentials and try again.";
         setErrors({
-          email: "Invalid email or password. Please check your credentials and try again.",
-          password: "Invalid email or password. Please check your credentials and try again."
+          email: message,
+          password: message
         });
+        return;
       }
+
+      const data = await response.json();
+      localStorage.setItem("access_token", data?.access_token);
+      localStorage.setItem("token_type", data?.token_type);
+      localStorage.setItem("role", data?.role);
+      localStorage.setItem("email", formData?.email);
+
+      const roleRedirects = {
+        admin: "/admin-dashboard",
+        instructor: "/instructor/dashboard",
+        learner: "/learner-courses-listing"
+      };
+
+      navigate(roleRedirects?.[data?.role] || "/login-screen");
+    } catch (error) {
+      setErrors({
+        email: "Unable to sign in right now. Please try again.",
+        password: "Unable to sign in right now. Please try again."
+      });
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const togglePasswordVisibility = () => {

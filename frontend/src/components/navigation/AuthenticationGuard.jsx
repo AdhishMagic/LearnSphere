@@ -11,28 +11,29 @@ const AuthenticationGuard = ({ children, requiredRole = null }) => {
 
   useEffect(() => {
     const checkAuthentication = () => {
-      const mockAuth = true;
-      const mockRole = 'learner';
+      const token = localStorage.getItem('access_token');
+      const role = localStorage.getItem('role');
+      const isAuth = Boolean(token);
 
-      setIsAuthenticated(mockAuth);
-      setUserRole(mockRole);
+      setIsAuthenticated(isAuth);
+      setUserRole(role);
       setIsLoading(false);
 
-      if (!mockAuth) {
-        navigate('/login-screen', { 
+      if (!isAuth) {
+        navigate('/login-screen', {
           state: { from: location?.pathname },
-          replace: true 
+          replace: true
         });
         return;
       }
 
-      if (requiredRole && mockRole !== requiredRole) {
+      if (requiredRole && role !== requiredRole) {
         const roleRedirects = {
           admin: '/admin-dashboard',
           instructor: '/instructor/dashboard',
           learner: '/learner-courses-listing',
         };
-        navigate(roleRedirects?.[mockRole] || '/login-screen', { replace: true });
+        navigate(roleRedirects?.[role] || '/login-screen', { replace: true });
       }
     };
 

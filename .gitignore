@@ -9,3 +9,8 @@ vite.config.*s.*
 
 # build output
 dist/
+backend/.env
+
+# Python virtual environments
+.venv/
+backend/.venv/

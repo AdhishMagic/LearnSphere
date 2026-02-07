@@ -4,6 +4,7 @@ import Button from '../../../components/ui/Button';
 import Icon from '../../../components/AppIcon';
 
 const RegisterForm = ({ onLogin }) => {
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
     const [formData, setFormData] = useState({
         fullName: '',
         email: '',
@@ -85,18 +86,51 @@ const RegisterForm = ({ onLogin }) => {
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (validateForm()) {
             setIsLoading(true);
-            // Mock API call
-            console.log('Registering user:', formData);
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/auth/register`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        fullName: formData.fullName,
+                        email: formData.email,
+                        password: formData.password
+                    })
+                });
 
-            setTimeout(() => {
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    const message = errorData?.detail || "Registration failed. Please try again.";
+                    setErrors(prev => ({
+                        ...prev,
+                        email: message
+                    }));
+                    return;
+                }
+
+                setFormData({
+                    fullName: '',
+                    email: '',
+                    password: '',
+                    confirmPassword: '',
+                    agreeToTerms: false
+                });
+
+                onLogin?.();
+            } catch (error) {
+                setErrors(prev => ({
+                    ...prev,
+                    email: "Unable to register right now. Please try again."
+                }));
+            } finally {
                 setIsLoading(false);
-                alert('Registration successful! (See console for data)');
-            }, 1000);
+            }
         }
     };
 
