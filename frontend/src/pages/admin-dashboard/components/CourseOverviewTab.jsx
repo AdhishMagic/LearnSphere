@@ -10,63 +10,63 @@ const CourseOverviewTab = () => {
     pendingApproval: 23,
     draftCourses: 332,
     topPerformingCourses: [
-    {
-      id: 1,
-      title: "Advanced React Development",
-      instructor: "Dr. Sarah Mitchell",
-      enrollments: 3456,
-      rating: 4.8,
-      revenue: 86400,
-      image: "https://img.rocket.new/generatedImages/rocket_gen_img_12225c17b-1765211045033.png",
-      imageAlt: "Modern laptop displaying colorful React code editor with component structure on dark background"
-    },
-    {
-      id: 2,
-      title: "Machine Learning Fundamentals",
-      instructor: "Prof. James Chen",
-      enrollments: 2987,
-      rating: 4.9,
-      revenue: 74675,
-      image: "https://img.rocket.new/generatedImages/rocket_gen_img_15b9cfc75-1764651774193.png",
-      imageAlt: "Digital neural network visualization with glowing blue nodes and connections representing machine learning algorithms"
-    },
-    {
-      id: 3,
-      title: "Full Stack Web Development",
-      instructor: "Maria Rodriguez",
-      enrollments: 2654,
-      rating: 4.7,
-      revenue: 66350,
-      image: "https://img.rocket.new/generatedImages/rocket_gen_img_1cd7345e3-1766070002920.png",
-      imageAlt: "Multiple computer monitors showing various web development interfaces with code and design mockups in modern office"
-    }],
+      {
+        id: 1,
+        title: "Advanced React Development",
+        instructor: "Dr. Sarah Mitchell",
+        enrollments: 3456,
+        rating: 4.8,
+        revenue: 86400,
+        image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee",
+        imageAlt: "Modern laptop displaying colorful React code editor with component structure on dark background"
+      },
+      {
+        id: 2,
+        title: "Machine Learning Fundamentals",
+        instructor: "Prof. James Chen",
+        enrollments: 2987,
+        rating: 4.9,
+        revenue: 74675,
+        image: "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb",
+        imageAlt: "Digital neural network visualization with glowing blue nodes and connections representing machine learning algorithms"
+      },
+      {
+        id: 3,
+        title: "Full Stack Web Development",
+        instructor: "Maria Rodriguez",
+        enrollments: 2654,
+        rating: 4.7,
+        revenue: 66350,
+        image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97",
+        imageAlt: "Multiple computer monitors showing various web development interfaces with code and design mockups in modern office"
+      }],
 
     pendingApprovals: [
-    {
-      id: 1,
-      title: "Introduction to Blockchain Technology",
-      instructor: "Alex Thompson",
-      submittedDate: "02/05/2026",
-      category: "Technology",
-      image: "https://images.unsplash.com/photo-1649682892309-e10e0b7cd40b",
-      imageAlt: "Abstract digital blockchain network with golden cryptocurrency coins and glowing connection lines on dark blue background"
-    },
-    {
-      id: 2,
-      title: "Digital Marketing Strategies 2026",
-      instructor: "Emily Watson",
-      submittedDate: "02/06/2026",
-      category: "Marketing",
-      image: "https://img.rocket.new/generatedImages/rocket_gen_img_1ecd42800-1767033343981.png",
-      imageAlt: "Business team analyzing digital marketing data on large screen with colorful charts and graphs in modern conference room"
-    }],
+      {
+        id: 1,
+        title: "Introduction to Blockchain Technology",
+        instructor: "Alex Thompson",
+        submittedDate: "02/05/2026",
+        category: "Technology",
+        image: "https://images.unsplash.com/photo-1649682892309-e10e0b7cd40b",
+        imageAlt: "Abstract digital blockchain network with golden cryptocurrency coins and glowing connection lines on dark blue background"
+      },
+      {
+        id: 2,
+        title: "Digital Marketing Strategies 2026",
+        instructor: "Emily Watson",
+        submittedDate: "02/06/2026",
+        category: "Marketing",
+        image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f",
+        imageAlt: "Business team analyzing digital marketing data on large screen with colorful charts and graphs in modern conference room"
+      }],
 
     categoryDistribution: [
-    { category: "Technology", count: 456, percentage: 36.6 },
-    { category: "Business", count: 298, percentage: 23.9 },
-    { category: "Design", count: 234, percentage: 18.8 },
-    { category: "Marketing", count: 156, percentage: 12.5 },
-    { category: "Others", count: 103, percentage: 8.2 }]
+      { category: "Technology", count: 456, percentage: 36.6 },
+      { category: "Business", count: 298, percentage: 23.9 },
+      { category: "Design", count: 234, percentage: 18.8 },
+      { category: "Marketing", count: 156, percentage: 12.5 },
+      { category: "Others", count: 103, percentage: 8.2 }]
 
   };
 
@@ -133,13 +133,13 @@ const CourseOverviewTab = () => {
         </div>
         <div className="space-y-4 md:space-y-6">
           {courseStats?.topPerformingCourses?.map((course) =>
-          <div key={course?.id} className="flex flex-col md:flex-row gap-4 p-3 md:p-4 bg-muted/30 rounded-lg hover:bg-muted/50 transition-smooth">
+            <div key={course?.id} className="flex flex-col md:flex-row gap-4 p-3 md:p-4 bg-muted/30 rounded-lg hover:bg-muted/50 transition-smooth">
               <div className="w-full md:w-32 h-32 md:h-20 rounded-lg overflow-hidden flex-shrink-0">
                 <Image
-                src={course?.image}
-                alt={course?.imageAlt}
-                className="w-full h-full object-cover" />
-              
+                  src={course?.image}
+                  alt={course?.imageAlt}
+                  className="w-full h-full object-cover" />
+
               </div>
               <div className="flex-1 min-w-0">
                 <h4 className="text-base md:text-lg font-semibold text-foreground mb-1 md:mb-2 line-clamp-1">
@@ -185,13 +185,13 @@ const CourseOverviewTab = () => {
           </div>
           <div className="space-y-4">
             {courseStats?.pendingApprovals?.map((course) =>
-            <div key={course?.id} className="flex flex-col sm:flex-row gap-3 p-3 md:p-4 bg-muted/30 rounded-lg">
+              <div key={course?.id} className="flex flex-col sm:flex-row gap-3 p-3 md:p-4 bg-muted/30 rounded-lg">
                 <div className="w-full sm:w-20 h-32 sm:h-20 rounded-lg overflow-hidden flex-shrink-0">
                   <Image
-                  src={course?.image}
-                  alt={course?.imageAlt}
-                  className="w-full h-full object-cover" />
-                
+                    src={course?.image}
+                    alt={course?.imageAlt}
+                    className="w-full h-full object-cover" />
+
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4 className="text-sm md:text-base font-semibold text-foreground mb-1 line-clamp-2">
@@ -233,7 +233,7 @@ const CourseOverviewTab = () => {
           </div>
           <div className="space-y-4 md:space-y-5">
             {courseStats?.categoryDistribution?.map((category, index) =>
-            <div key={index} className="space-y-2">
+              <div key={index} className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm md:text-base font-medium text-foreground">
                     {category?.category}
@@ -244,9 +244,9 @@ const CourseOverviewTab = () => {
                 </div>
                 <div className="w-full h-2 md:h-3 bg-muted rounded-full overflow-hidden">
                   <div
-                  className="h-full bg-gradient-to-r from-primary to-secondary transition-all duration-500"
-                  style={{ width: `${category?.percentage}%` }} />
-                
+                    className="h-full bg-gradient-to-r from-primary to-secondary transition-all duration-500"
+                    style={{ width: `${category?.percentage}%` }} />
+
                 </div>
               </div>
             )}
