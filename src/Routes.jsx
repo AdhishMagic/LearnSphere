@@ -10,6 +10,9 @@ import LoginScreen from './pages/login-screen';
 import LearnerCoursesListing from './pages/learner-courses-listing';
 import AdminCoursesPage from './pages/admin-courses';
 import AdminUsersPage from './pages/admin-users';
+import AdminReportsPage from './pages/admin-reports';
+import AdminAnalyticsPage from './pages/admin-analytics/AdminAnalyticsPage';
+import AdminSettingsPage from './pages/admin-settings/AdminSettingsPage';
 
 const Routes = () => {
   return (
@@ -24,6 +27,9 @@ const Routes = () => {
           <Route path="/learner-courses-listing" element={<LearnerCoursesListing />} />
           <Route path="/admin/courses" element={<AdminCoursesPage />} />
           <Route path="/admin/users" element={<AdminUsersPage />} />
+          <Route path="/admin/reports" element={<AdminReportsPage />} />
+          <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
+          <Route path="/admin/settings" element={<AdminSettingsPage />} />
           <Route path="*" element={<NotFound />} />
         </RouterRoutes>
       </ErrorBoundary>
