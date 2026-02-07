@@ -25,12 +25,30 @@ async def create_user(db: AsyncIOMotorDatabase, register_data: RegisterRequest, 
     if existing:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
 
+    full_name = register_data.fullName.strip()
+    name_parts = [part for part in full_name.split() if part]
+    first_name = name_parts[0] if name_parts else ""
+    last_name = " ".join(name_parts[1:]) if len(name_parts) > 1 else ""
+    now = datetime.utcnow()
+
     user_doc = {
-        "full_name": register_data.fullName,
+        "full_name": full_name,
+        "first_name": first_name,
+        "last_name": last_name,
         "email": register_data.email.lower(),
         "password_hash": hash_password(register_data.password),
+        "phone": None,
+        "avatar": None,
+        "bio": None,
+        "location": None,
         "role": role,
-        "created_at": datetime.utcnow(),
+        "joined_date": now,
+        "created_at": now,
+        "total_points": 0,
+        "instructor_application": None,
+        "instructor_data": None,
+        "admin_level": None,
+        "permissions": None,
     }
 
     result = await db[USERS_COLLECTION].insert_one(user_doc)
@@ -54,14 +72,50 @@ async def ensure_admin_user(db: AsyncIOMotorDatabase) -> None:
     admin_email = "admin@gmail.com"
     admin_password = "Admin@123"
     existing = await get_user_by_email(db, admin_email)
-    if existing:
-        return
 
+    now = datetime.utcnow()
     admin_doc = {
         "full_name": "Admin",
+        "first_name": "Admin",
+        "last_name": "",
         "email": admin_email,
         "password_hash": hash_password(admin_password),
+        "phone": None,
+        "avatar": None,
+        "bio": None,
+        "location": None,
         "role": "admin",
-        "created_at": datetime.utcnow(),
+        "joined_date": now,
+        "created_at": now,
+        "total_points": 0,
+        "instructor_application": None,
+        "instructor_data": None,
+        "admin_level": "Admin",
+        "permissions": [],
     }
+
+    if existing:
+        await db[USERS_COLLECTION].update_one(
+            {"_id": existing["_id"]},
+            {
+                "$set": {
+                    "full_name": existing.get("full_name") or admin_doc["full_name"],
+                    "first_name": existing.get("first_name") or admin_doc["first_name"],
+                    "last_name": existing.get("last_name") or admin_doc["last_name"],
+                    "phone": existing.get("phone") if existing.get("phone") is not None else admin_doc["phone"],
+                    "avatar": existing.get("avatar") if existing.get("avatar") is not None else admin_doc["avatar"],
+                    "bio": existing.get("bio") if existing.get("bio") is not None else admin_doc["bio"],
+                    "location": existing.get("location") if existing.get("location") is not None else admin_doc["location"],
+                    "role": admin_doc["role"],
+                    "joined_date": existing.get("joined_date") or admin_doc["joined_date"],
+                    "total_points": existing.get("total_points", 0),
+                    "instructor_application": existing.get("instructor_application"),
+                    "instructor_data": existing.get("instructor_data"),
+                    "admin_level": existing.get("admin_level") or admin_doc["admin_level"],
+                    "permissions": existing.get("permissions") if existing.get("permissions") is not None else admin_doc["permissions"],
+                }
+            },
+        )
+        return
+
     await db[USERS_COLLECTION].insert_one(admin_doc)

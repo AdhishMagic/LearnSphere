@@ -18,93 +18,46 @@ import {
     Star
 } from 'lucide-react';
 import Button from '../../../components/ui/Button';
-import { mockInstructorCourses, courseStatusConfig } from '../mockData';
-
-// Mock all users data for admin
-const mockAllUsers = [
-    {
-        id: 'user-001',
-        name: 'John Smith',
-        email: 'john.smith@example.com',
-        role: 'learner',
-        status: 'active',
-        coursesEnrolled: 5,
-        joinedDate: '2024-01-15'
+const courseStatusConfig = {
+    published: {
+        label: 'Published',
+        color: 'bg-green-100 text-green-700 border-green-200'
     },
-    {
-        id: 'user-002',
-        name: 'Sarah Johnson',
-        email: 'sarah.johnson@example.com',
-        role: 'instructor',
-        status: 'active',
-        coursesCreated: 5,
-        joinedDate: '2023-06-20'
+    draft: {
+        label: 'Draft',
+        color: 'bg-gray-100 text-gray-700 border-gray-200'
     },
-    {
-        id: 'user-003',
-        name: 'Mike Williams',
-        email: 'mike.w@example.com',
-        role: 'learner',
-        status: 'active',
-        coursesEnrolled: 3,
-        joinedDate: '2024-02-10'
+    pending_review: {
+        label: 'Pending Review',
+        color: 'bg-yellow-100 text-yellow-700 border-yellow-200'
     },
-    {
-        id: 'user-004',
-        name: 'Emily Davis',
-        email: 'emily.d@example.com',
-        role: 'instructor',
-        status: 'pending',
-        coursesCreated: 0,
-        joinedDate: '2025-02-01'
-    },
-    {
-        id: 'user-005',
-        name: 'Alex Turner',
-        email: 'alex.t@example.com',
-        role: 'learner',
-        status: 'inactive',
-        coursesEnrolled: 1,
-        joinedDate: '2023-11-05'
+    archived: {
+        label: 'Archived',
+        color: 'bg-red-100 text-red-700 border-red-200'
     }
-];
+};
 
-// Mock pending instructor applications
-const mockPendingApplications = [
-    {
-        id: 'app-001',
-        userId: 'user-006',
-        name: 'Robert Chen',
-        email: 'robert.chen@example.com',
-        degree: 'Master\'s Degree',
-        institution: 'Stanford University',
-        experience: '5-10',
-        specializations: ['Data Science', 'Machine Learning'],
-        submittedAt: '2025-02-05'
-    },
-    {
-        id: 'app-002',
-        userId: 'user-007',
-        name: 'Jessica Moore',
-        email: 'jessica.m@example.com',
-        degree: 'Ph.D.',
-        institution: 'MIT',
-        experience: '10+',
-        specializations: ['Cybersecurity', 'Cloud Computing'],
-        submittedAt: '2025-02-06'
-    }
-];
-
-const AdminControlsTab = ({ user }) => {
+const AdminControlsTab = ({ user, onApproveInstructor }) => {
     const navigate = useNavigate();
     const [activeSection, setActiveSection] = useState('overview');
 
+    const pendingApplications = Array.isArray(user?.pendingInstructorApplications)
+        ? user.pendingInstructorApplications
+        : [];
+
+    const adminCourses = Array.isArray(user?.adminCourses)
+        ? user.adminCourses
+        : [];
+    const recentUsers = Array.isArray(user?.recentUsers)
+        ? user.recentUsers
+        : [];
+
     const adminStats = {
-        totalUsers: 12547,
-        totalCourses: 856,
-        totalInstructors: 234,
-        pendingApplications: mockPendingApplications.length,
-        revenue: 125890
+        totalUsers: user?.adminStats?.totalUsers || 0,
+        totalCourses: user?.adminStats?.totalCourses || 0,
+        totalInstructors: user?.adminStats?.totalInstructors || 0,
+        pendingApplications: pendingApplications.length,
+        revenue: user?.adminStats?.revenue || 0
     };
 
     const quickActions = [
@@ -138,14 +91,20 @@ const AdminControlsTab = ({ user }) => {
         }
     ];
 
-    const handleApproveApplication = (appId) => {
-        console.log('[Admin] Approving application:', appId);
-        alert('Application approved! User is now an instructor.');
+    const handleApproveApplication = async (userId) => {
+        if (!onApproveInstructor) {
+            alert('Approval is not available.');
+            return;
+        }
+
+        const result = await onApproveInstructor(userId);
+        if (result) {
+            alert('Application approved.');
+        }
     };
 
-    const handleRejectApplication = (appId) => {
-        console.log('[Admin] Rejecting application:', appId);
-        alert('Application rejected.');
+    const handleRejectApplication = () => {
+        alert('Application rejection is not available.');
     };
 
     return (
@@ -219,9 +178,9 @@ const AdminControlsTab = ({ user }) => {
                     <div>
                         <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                             Pending Instructor Applications
-                            {mockPendingApplications.length > 0 && (
+                            {pendingApplications.length > 0 && (
                                 <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded-full text-sm">
-                                    {mockPendingApplications.length}
+                                    {pendingApplications.length}
                                 </span>
                             )}
                         </h3>
@@ -229,13 +188,13 @@ const AdminControlsTab = ({ user }) => {
                     </div>
                 </div>
                 <div className="p-6 space-y-4">
-                    {mockPendingApplications.length === 0 ? (
+                    {pendingApplications.length === 0 ? (
                         <div className="text-center py-8 text-gray-500">
                             <CheckCircle size={48} className="mx-auto mb-3 opacity-50" />
                             <p>No pending applications</p>
                         </div>
                     ) : (
-                        mockPendingApplications.map(app => (
+                        pendingApplications.map(app => (
                             <div
                                 key={app.id}
                                 className="flex flex-col sm:flex-row gap-4 p-4 border border-gray-200 rounded-xl"
@@ -279,7 +238,7 @@ const AdminControlsTab = ({ user }) => {
                                 <div className="flex sm:flex-col gap-2 sm:justify-center">
                                     <Button
                                         size="sm"
-                                        onClick={() => handleApproveApplication(app.id)}
+                                        onClick={() => handleApproveApplication(app.userId)}
                                         className="bg-green-600 hover:bg-green-700"
                                     >
                                         <CheckCircle size={14} className="mr-1" />
@@ -288,7 +247,7 @@ const AdminControlsTab = ({ user }) => {
                                     <Button
                                         size="sm"
                                         variant="secondary"
-                                        onClick={() => handleRejectApplication(app.id)}
+                                        onClick={handleRejectApplication}
                                         className="border-red-200 text-red-600 hover:bg-red-50"
                                     >
                                         <XCircle size={14} className="mr-1" />
@@ -327,7 +286,7 @@ const AdminControlsTab = ({ user }) => {
                     </div>
                 </div>
                 <div className="p-6 space-y-4">
-                    {mockInstructorCourses.slice(0, 3).map(course => (
+                    {adminCourses.slice(0, 3).map(course => (
                         <div
                             key={course.id}
                             className="flex flex-col sm:flex-row gap-4 p-4 border border-gray-200 rounded-xl hover:border-gray-300 transition-all"
@@ -405,7 +364,7 @@ const AdminControlsTab = ({ user }) => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
-                            {mockAllUsers.map(u => (
+                            {recentUsers.map(u => (
                                 <tr key={u.id} className="hover:bg-gray-50">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
@@ -445,13 +404,13 @@ const AdminControlsTab = ({ user }) => {
                                         <div className="flex justify-end gap-1">
                                             <button
                                                 className="p-2 hover:bg-gray-100 rounded-lg"
-                                                onClick={() => console.log('[Admin] View user:', u.id)}
+                                                onClick={() => alert('User actions are not available.')}
                                             >
                                                 <Eye size={16} className="text-gray-500" />
                                             </button>
                                             <button
                                                 className="p-2 hover:bg-gray-100 rounded-lg"
-                                                onClick={() => console.log('[Admin] Edit user:', u.id)}
+                                                onClick={() => alert('User actions are not available.')}
                                             >
                                                 <Edit size={16} className="text-gray-500" />
                                             </button>

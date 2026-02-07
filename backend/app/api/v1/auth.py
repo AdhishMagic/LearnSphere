@@ -24,7 +24,7 @@ async def login_user(
     payload: LoginRequest, db: AsyncIOMotorDatabase = Depends(get_database)
 ) -> LoginResponse:
     user = await authenticate_user(db, payload.email, payload.password)
-    access_token = create_access_token({"sub": user["email"], "role": user["role"]})
+    access_token = create_access_token({"sub": user["_id"], "email": user["email"]})
     return LoginResponse(access_token=access_token, role=user["role"])
 
 

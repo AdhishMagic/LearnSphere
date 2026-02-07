@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Camera, Mail, Phone, MapPin, Calendar, Award, BookOpen, GraduationCap, Save } from 'lucide-react';
 import Button from '../../../components/ui/Button';
 
@@ -13,14 +13,24 @@ const PersonalInfoTab = ({ user, onUpdateUser }) => {
         bio: user?.bio || ''
     });
 
+    useEffect(() => {
+        setFormData({
+            firstName: user?.firstName || '',
+            lastName: user?.lastName || '',
+            email: user?.email || '',
+            phone: user?.phone || '',
+            location: user?.location || '',
+            bio: user?.bio || ''
+        });
+    }, [user]);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSave = () => {
-        console.log('[Profile] Saving personal info:', formData);
-        onUpdateUser({ ...user, ...formData });
+    const handleSave = async () => {
+        await onUpdateUser({ ...user, ...formData });
         setIsEditing(false);
     };
 

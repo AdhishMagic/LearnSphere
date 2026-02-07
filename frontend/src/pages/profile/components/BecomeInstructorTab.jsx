@@ -19,7 +19,60 @@ import {
     CheckCircle
 } from 'lucide-react';
 import Button from '../../../components/ui/Button';
-import { degreeOptions, specializationOptions, experienceOptions, mockInstructorCourses, courseStatusConfig } from '../mockData';
+
+const degreeOptions = [
+    'High School Diploma',
+    'Associate Degree',
+    "Bachelor's Degree",
+    "Master's Degree",
+    'Ph.D.',
+    'Professional Certification',
+    'Other'
+];
+
+const specializationOptions = [
+    'Web Development',
+    'Mobile Development',
+    'Data Science',
+    'Machine Learning',
+    'Cloud Computing',
+    'DevOps',
+    'Cybersecurity',
+    'UI/UX Design',
+    'Project Management',
+    'Digital Marketing',
+    'Business Analytics',
+    'Blockchain',
+    'Game Development',
+    'Other'
+];
+
+const experienceOptions = [
+    { value: '0-1', label: 'Less than 1 year' },
+    { value: '1-3', label: '1-3 years' },
+    { value: '3-5', label: '3-5 years' },
+    { value: '5-10', label: '5-10 years' },
+    { value: '10+', label: '10+ years' }
+];
+
+const courseStatusConfig = {
+    published: {
+        label: 'Published',
+        color: 'bg-green-100 text-green-700 border-green-200'
+    },
+    draft: {
+        label: 'Draft',
+        color: 'bg-gray-100 text-gray-700 border-gray-200'
+    },
+    pending_review: {
+        label: 'Pending Review',
+        color: 'bg-yellow-100 text-yellow-700 border-yellow-200'
+    },
+    archived: {
+        label: 'Archived',
+        color: 'bg-red-100 text-red-700 border-red-200'
+    }
+};
 
 const BecomeInstructorTab = ({ user, onSubmitApplication, onBecomeInstructor }) => {
     const navigate = useNavigate();
@@ -41,7 +94,6 @@ const BecomeInstructorTab = ({ user, onSubmitApplication, onBecomeInstructor }) 
 
     // Check if user already has a pending application
     const hasPendingApplication = user?.instructorApplication?.status === 'pending';
-    const isApproved = user?.instructorApplication?.status === 'approved';
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -89,10 +141,9 @@ const BecomeInstructorTab = ({ user, onSubmitApplication, onBecomeInstructor }) 
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (validateForm()) {
-            console.log('[Profile] Submitting instructor application:', formData);
-            onSubmitApplication({
+            await onSubmitApplication({
                 ...formData,
                 status: 'pending',
                 submittedAt: new Date().toISOString()
@@ -103,15 +154,18 @@ const BecomeInstructorTab = ({ user, onSubmitApplication, onBecomeInstructor }) 
 
     // If already an instructor, show instructor details
     if (user?.role === 'instructor') {
+        const instructorCourses = Array.isArray(user?.instructorCourses)
+            ? user.instructorCourses
+            : [];
         const filteredCourses = courseFilter === 'all'
-            ? mockInstructorCourses
-            : mockInstructorCourses.filter(c => c.status === courseFilter);
+            ? instructorCourses
+            : instructorCourses.filter(c => c.status === courseFilter);
 
         const statusCounts = {
-            all: mockInstructorCourses.length,
-            published: mockInstructorCourses.filter(c => c.status === 'published').length,
-            draft: mockInstructorCourses.filter(c => c.status === 'draft').length,
-            pending_review: mockInstructorCourses.filter(c => c.status === 'pending_review').length
+            all: instructorCourses.length,
+            published: instructorCourses.filter(c => c.status === 'published').length,
+            draft: instructorCourses.filter(c => c.status === 'draft').length,
+            pending_review: instructorCourses.filter(c => c.status === 'pending_review').length
         };
 
         return (
@@ -138,7 +192,7 @@ const BecomeInstructorTab = ({ user, onSubmitApplication, onBecomeInstructor }) 
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
                         <div className="bg-white/10 rounded-lg p-4">
-                            <p className="text-2xl font-bold">{mockInstructorCourses.length}</p>
+                            <p className="text-2xl font-bold">{instructorCourses.length}</p>
                             <p className="text-sm text-white/70">Courses Created</p>
                         </div>
                         <div className="bg-white/10 rounded-lg p-4">
@@ -252,7 +306,6 @@ const BecomeInstructorTab = ({ user, onSubmitApplication, onBecomeInstructor }) 
                                             size="sm"
                                             variant="secondary"
                                             onClick={() => {
-                                                console.log('[Course] Editing course:', course.id);
                                                 navigate(`/instructor/courses/edit/${course.id}`);
                                             }}
                                         >
@@ -264,7 +317,6 @@ const BecomeInstructorTab = ({ user, onSubmitApplication, onBecomeInstructor }) 
                                                 size="sm"
                                                 variant="secondary"
                                                 onClick={() => {
-                                                    console.log('[Course] Viewing course:', course.id);
                                                     navigate(`/course/${course.id}`);
                                                 }}
                                             >

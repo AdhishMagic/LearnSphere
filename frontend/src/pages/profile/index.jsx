@@ -1,88 +1,176 @@
-import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { User, GraduationCap, ArrowLeft, Shield } from 'lucide-react';
 import LearnerNavbar from '../../components/navigation/LearnerNavbar';
 import InstructorNavbar from '../../components/navigation/InstructorNavbar';
 import PersonalInfoTab from './components/PersonalInfoTab';
 import BecomeInstructorTab from './components/BecomeInstructorTab';
 import AdminControlsTab from './components/AdminControlsTab';
-import { mockUsers } from './mockData';
-import Button from '../../components/ui/Button';
 
 const ProfilePage = () => {
     const navigate = useNavigate();
-    const location = useLocation();
-
-    // Determine role from URL query param or default to learner
-    const searchParams = new URLSearchParams(location.search);
-    const urlRole = searchParams.get('role');
-
-    // Get initial user based on role
-    const getInitialUser = () => {
-        if (urlRole === 'admin') return { ...mockUsers.admin };
-        if (urlRole === 'instructor') return { ...mockUsers.instructor };
-        return { ...mockUsers.learner };
-    };
-
-    const [user, setUser] = useState(getInitialUser());
+    const [user, setUser] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('personal');
+
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                alert('You need to log in to view your profile.');
+                setIsLoading(false);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/profile/me`, {
+                    method: 'GET',
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    const message = errorData?.detail || 'Unable to load profile. Please try again.';
+                    alert(message);
+                    setIsLoading(false);
+                    return;
+                }
+
+                const data = await response.json();
+                setUser(data);
+            } catch (error) {
+                alert('Unable to load profile. Please try again.');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchProfile();
+    }, [API_BASE_URL]);
 
     const tabs = [
         { id: 'personal', label: 'Personal Info', icon: User },
         // Show "Admin Controls" tab for admins
-        ...(user.role === 'admin' ? [{
+        ...(user?.role === 'admin' ? [{
             id: 'admin',
             label: 'Admin Controls',
             icon: Shield
         }] : []),
         // Only show "Become Instructor" tab for learners, or "Instructor Profile" for instructors
-        ...(user.role !== 'admin' ? [{
+        ...(user?.role !== 'admin' ? [{
             id: 'instructor',
-            label: user.role === 'instructor' ? 'Instructor Profile' : 'Become Instructor',
+            label: user?.role === 'instructor' ? 'Instructor Profile' : 'Become Instructor',
             icon: GraduationCap
         }] : []),
     ];
 
-    const handleUpdateUser = (updatedUser) => {
-        setUser(updatedUser);
-        console.log('[Profile] User updated:', updatedUser);
-    };
+    const handleUpdateUser = async (updatedUser) => {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            alert('You need to log in to update your profile.');
+            return;
+        }
 
-    const handleSubmitApplication = (applicationData) => {
-        setUser(prev => ({
-            ...prev,
-            instructorApplication: applicationData
-        }));
-        console.log('[Profile] Instructor application submitted:', applicationData);
-    };
+        const payload = {
+            firstName: updatedUser?.firstName,
+            lastName: updatedUser?.lastName,
+            phone: updatedUser?.phone,
+            avatar: updatedUser?.avatar,
+            bio: updatedUser?.bio,
+            location: updatedUser?.location
+        };
 
-    const handleBecomeInstructor = () => {
-        // Transform learner to instructor
-        setUser(prev => ({
-            ...prev,
-            role: 'instructor',
-            instructorData: {
-                degree: prev.instructorApplication?.degree || '',
-                institution: prev.instructorApplication?.institution || '',
-                yearsOfExperience: prev.instructorApplication?.experience || '0-1',
-                specializations: prev.instructorApplication?.specializations || [],
-                certifications: prev.instructorApplication?.certifications || [],
-                linkedIn: prev.instructorApplication?.linkedIn || '',
-                portfolio: prev.instructorApplication?.portfolio || '',
-                coursesCreated: 0,
-                totalStudents: 0,
-                averageRating: 0
-            },
-            instructorApplication: {
-                ...prev.instructorApplication,
-                status: 'approved'
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/v1/profile/me`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                const message = errorData?.detail || 'Unable to update profile. Please try again.';
+                alert(message);
+                return;
             }
-        }));
-        console.log('[Profile] User promoted to instructor');
+
+            const data = await response.json();
+            setUser(data);
+        } catch (error) {
+            alert('Unable to update profile. Please try again.');
+        }
+    };
+
+    const handleSubmitApplication = async (applicationData) => {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            alert('You need to log in to submit an application.');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/v1/profile/instructor/apply`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify(applicationData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                const message = errorData?.detail || 'Unable to submit application. Please try again.';
+                alert(message);
+                return;
+            }
+
+            const data = await response.json();
+            setUser(data);
+        } catch (error) {
+            alert('Unable to submit application. Please try again.');
+        }
+    };
+
+    const handleApproveInstructor = async (userId) => {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            alert('You need to log in to approve instructors.');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/v1/profile/instructor/approve/${userId}`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                const message = errorData?.detail || 'Unable to approve application. Please try again.';
+                alert(message);
+                return null;
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            alert('Unable to approve application. Please try again.');
+            return null;
+        }
     };
 
     const getBackRoute = () => {
-        switch (user.role) {
+        switch (user?.role) {
             case 'admin':
                 return '/admin-dashboard';
             case 'instructor':
@@ -93,7 +181,7 @@ const ProfilePage = () => {
     };
 
     const renderNavbar = () => {
-        switch (user.role) {
+        switch (user?.role) {
             case 'admin':
                 // Admin uses a simplified header since they typically use sidebar
                 return (
@@ -130,6 +218,10 @@ const ProfilePage = () => {
         }
     };
 
+    if (isLoading || !user) {
+        return null;
+    }
+
     return (
         <div className="min-h-screen bg-background">
             {renderNavbar()}
@@ -138,7 +230,7 @@ const ProfilePage = () => {
                 {/* Page Header */}
                 <div className="mb-6 sm:mb-8">
                     <div className="flex items-center gap-3 mb-2">
-                        {user.role !== 'admin' && (
+                        {user?.role !== 'admin' && (
                             <button
                                 onClick={() => navigate(getBackRoute())}
                                 className="p-2 rounded-lg hover:bg-muted transition-colors"
@@ -182,13 +274,13 @@ const ProfilePage = () => {
                         />
                     )}
                     {activeTab === 'admin' && (
-                        <AdminControlsTab user={user} />
+                        <AdminControlsTab user={user} onApproveInstructor={handleApproveInstructor} />
                     )}
                     {activeTab === 'instructor' && (
                         <BecomeInstructorTab
                             user={user}
                             onSubmitApplication={handleSubmitApplication}
-                            onBecomeInstructor={handleBecomeInstructor}
+                            onBecomeInstructor={handleApproveInstructor}
                         />
                     )}
                 </div>
