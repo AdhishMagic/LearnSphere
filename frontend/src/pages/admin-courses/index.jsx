@@ -7,6 +7,7 @@ import Select from '../../components/ui/Select';
 import { Search, Plus } from 'lucide-react';
 import CourseTable from './components/CourseTable';
 import AssignInstructorModal from './components/AssignInstructorModal';
+import EditCourseModal from './components/EditCourseModal';
 import { MOCK_COURSES, MOCK_INSTRUCTORS } from './mockData';
 
 const AdminCoursesPage = () => {
@@ -21,6 +22,8 @@ const AdminCoursesPage = () => {
     // Modal State
     const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
     const [selectedCourseForAssign, setSelectedCourseForAssign] = useState(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [selectedCourseForEdit, setSelectedCourseForEdit] = useState(null);
 
     // Derived State
     const filteredCourses = courses.filter(course => {
@@ -44,8 +47,13 @@ const AdminCoursesPage = () => {
 
     // Handlers
     const handleEdit = (course) => {
-        console.log('Edit course:', course);
-        // Navigate to edit page or open modal
+        setSelectedCourseForEdit(course);
+        setIsEditModalOpen(true);
+    };
+
+    const handleSaveEditedCourse = (updatedCourse) => {
+        setCourses(prev => prev.map(c => (c.id === updatedCourse.id ? updatedCourse : c)));
+        console.log('Updated course (admin):', updatedCourse);
     };
 
     const handleTogglePublish = (course) => {
@@ -148,6 +156,13 @@ const AdminCoursesPage = () => {
                         onAssign={handleAssignInstructor}
                         currentInstructorId={selectedCourseForAssign?.instructorId}
                         courseTitle={selectedCourseForAssign?.title}
+                    />
+
+                    <EditCourseModal
+                        isOpen={isEditModalOpen}
+                        onClose={() => setIsEditModalOpen(false)}
+                        course={selectedCourseForEdit}
+                        onSave={handleSaveEditedCourse}
                     />
                 </div>
             </main>

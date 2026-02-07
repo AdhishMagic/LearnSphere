@@ -17,6 +17,8 @@ import AdminSettingsPage from './pages/admin-settings/AdminSettingsPage';
 import InstructorCoursesPage from './pages/instructor-courses';
 import InstructorReportsPage from './pages/instructor-reports';
 import CourseForm from './pages/course-form';
+import MyCoursesPage from './pages/my-courses';
+import CourseLearningPage from './pages/course-learning';
 
 const Routes = () => {
   return (
@@ -39,6 +41,8 @@ const Routes = () => {
           <Route path="/instructor/courses/create" element={<CourseForm />} />
           <Route path="/instructor/courses/edit/:courseId" element={<CourseForm />} />
           <Route path="/instructor/reports" element={<InstructorReportsPage />} />
+          <Route path="/my-courses" element={<MyCoursesPage />} />
+          <Route path="/course/:courseId" element={<CourseLearningPage />} />
           <Route path="*" element={<NotFound />} />
         </RouterRoutes>
       </ErrorBoundary>

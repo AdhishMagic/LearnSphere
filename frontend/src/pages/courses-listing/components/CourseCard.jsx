@@ -6,8 +6,13 @@ const CourseCard = ({ course }) => {
 
     const handleViewCourse = () => {
         console.log(`Navigating to course detail: ${course.id} - ${course.title}`);
-        // Navigate to Course Detail Page (Module B3)
-        navigate(`/courses/${course.id}`);
+        // Navigate to Course Detail Page
+        navigate(`/course/${course.id}`, {
+            state: {
+                from: '/courses',
+                courseMeta: course
+            }
+        });
     };
 
     return (
@@ -64,7 +69,10 @@ const CourseCard = ({ course }) => {
 
                 {/* CTA Button */}
                 <button
-                    onClick={handleViewCourse}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        handleViewCourse();
+                    }}
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors duration-200"
                 >
                     View Course

@@ -41,22 +41,13 @@ const RoleSidebar = ({ isCollapsed = false, onToggleCollapse, activeRole = 'lear
         {
           title: 'Overview',
           items: [
-            { label: 'Dashboard', path: '/instructor/dashboard', icon: 'LayoutDashboard' },
-          ],
-        },
-        {
-          title: 'Content',
-          items: [
             { label: 'My Courses', path: '/instructor/courses', icon: 'BookOpen' },
-            { label: 'Course Editor', path: '/instructor/course-editor', icon: 'Edit3' },
-            { label: 'Quiz Builder', path: '/instructor/quiz-builder', icon: 'ClipboardList' },
           ],
         },
         {
-          title: 'Students',
+          title: 'System',
           items: [
-            { label: 'Learner Progress', path: '/instructor/learners', icon: 'Users' },
-            { label: 'Grading', path: '/instructor/grading', icon: 'CheckSquare' },
+            { label: 'Reports', path: '/instructor/reports', icon: 'FileText' },
           ],
         },
       ],
