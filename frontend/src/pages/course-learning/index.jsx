@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import LearnerNavbar from '../../components/navigation/LearnerNavbar';
 import CourseOverview from './components/CourseOverview';
 import LessonPlayer from './components/LessonPlayer';
 import PointsPopup from './components/PointsPopup';
@@ -172,19 +173,10 @@ const CourseLearningPage = () => {
 
     return (
         <div className="min-h-screen">
-            <div className="fixed top-4 left-4 z-50">
-                <button
-                    type="button"
-                    onClick={() => navigate(backTarget)}
-                    className="inline-flex items-center gap-2 bg-white/95 hover:bg-white border border-gray-200 shadow-sm rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-colors"
-                >
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    Back to Courses
-                </button>
-            </div>
+            {/* Learner Navigation */}
+            <LearnerNavbar />
 
+            {/* Main Content */}
             {renderContent()}
 
             {/* Points Popup Overlay */}

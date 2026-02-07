@@ -3,26 +3,32 @@ import { X } from 'lucide-react';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
 import Select from '../../../components/ui/Select';
+import Icon from '../../../components/AppIcon';
 import { MOCK_ROLES } from '../mockData';
 
 const CreateUserModal = ({ isOpen, onClose, onCreate }) => {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
+        password: '',
         role: 'instructor' // Default to instructor, as learners register themselves
     });
+    const [showPassword, setShowPassword] = useState(false);
     const [errors, setErrors] = useState({});
 
     if (!isOpen) return null;
 
-    // Filter out 'learner' because they register themselves
-    const createRoles = MOCK_ROLES.filter(r => r.value !== 'learner');
+    // Include all roles
+    const createRoles = MOCK_ROLES;
 
     const validate = () => {
         const newErrors = {};
         if (!formData.name.trim()) newErrors.name = 'Name is required';
         if (!formData.email.trim()) newErrors.email = 'Email is required';
         else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid';
+
+        if (!formData.password) newErrors.password = 'Password is required';
+        else if (formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters';
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -32,7 +38,7 @@ const CreateUserModal = ({ isOpen, onClose, onCreate }) => {
         e.preventDefault();
         if (validate()) {
             onCreate(formData);
-            setFormData({ name: '', email: '', role: 'instructor' });
+            setFormData({ name: '', email: '', password: '', role: 'instructor' });
             onClose();
         }
     };
@@ -69,6 +75,25 @@ const CreateUserModal = ({ isOpen, onClose, onCreate }) => {
                         />
                     </div>
 
+                    <div className="relative">
+                        <Input
+                            label="Password"
+                            type={showPassword ? "text" : "password"}
+                            placeholder="••••••••"
+                            value={formData.password}
+                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                            error={errors.password}
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-9 text-muted-foreground hover:text-foreground transition-colors"
+                            aria-label={showPassword ? "Hide password" : "Show password"}
+                        >
+                            <Icon name={showPassword ? "EyeOff" : "Eye"} size={20} />
+                        </button>
+                    </div>
+
                     <div>
                         <Select
                             label="Role"
@@ -76,9 +101,6 @@ const CreateUserModal = ({ isOpen, onClose, onCreate }) => {
                             value={formData.role}
                             onChange={(value) => setFormData({ ...formData, role: value })}
                         />
-                        <p className="text-xs text-muted-foreground mt-1">
-                            Note: Learners cannot be created here. They must register themselves.
-                        </p>
                     </div>
 
                     <div className="flex justify-end gap-3 pt-2">

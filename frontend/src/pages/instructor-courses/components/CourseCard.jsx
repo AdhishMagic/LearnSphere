@@ -1,15 +1,51 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Badge from '../../../components/ui/Badge';
 import { Clock, BookOpen, Eye } from 'lucide-react';
 import CourseActions from './CourseActions';
 
 const CourseCard = ({ course }) => {
+    const navigate = useNavigate();
     const { title, image, status, views, lessonsCount, duration, tags } = course;
+
+    const courseMeta = useMemo(() => {
+        return {
+            id: course?.id,
+            title: course?.title,
+            description: course?.description || course?.subtitle || '',
+            coverImage: course?.coverImage || course?.image || course?.thumbnail,
+            instructor: course?.instructor || course?.instructorName || 'Instructor',
+            tags: course?.tags || [],
+        };
+    }, [course]);
 
     const statusVariant = status === 'Published' ? 'success' : 'secondary';
 
     return (
-        <div className="group flex flex-col border rounded-xl bg-card overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 h-full">
+        <div
+            className="group flex flex-col border rounded-xl bg-card overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 h-full cursor-pointer"
+            onClick={() =>
+                navigate(`/course/${course.id}`, {
+                    state: {
+                        from: '/instructor/courses',
+                        courseMeta,
+                    },
+                })
+            }
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    navigate(`/course/${course.id}`, {
+                        state: {
+                            from: '/instructor/courses',
+                            courseMeta,
+                        },
+                    });
+                }
+            }}
+        >
             <div className="relative h-48 w-full overflow-hidden">
                 <img
                     src={image}
@@ -25,7 +61,7 @@ const CourseCard = ({ course }) => {
 
             <div className="p-5 flex-1 flex flex-col">
                 <div className="flex flex-wrap gap-2 mb-3">
-                    {tags.map((tag) => (
+                    {(tags || []).map((tag) => (
                         <span key={tag} className="text-[10px] text-primary/80 bg-primary/5 px-2 py-0.5 rounded-full font-medium uppercase tracking-wider">
                             {tag}
                         </span>
@@ -60,7 +96,9 @@ const CourseCard = ({ course }) => {
                 <div className="mt-4 pt-4 border-t flex items-center justify-between">
                     <span className="text-xs text-muted-foreground">Last updated 2 days ago</span>
                     <div className="flex gap-2">
-                        <CourseActions courseId={course.id} />
+                        <div onClick={(e) => e.stopPropagation()}>
+                            <CourseActions courseId={course.id} />
+                        </div>
                     </div>
                 </div>
             </div>

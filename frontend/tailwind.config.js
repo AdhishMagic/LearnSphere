@@ -8,50 +8,50 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        border: 'var(--color-border)',
-        input: 'var(--color-input)',
-        ring: 'var(--color-ring)',
-        background: 'var(--color-background)',
-        foreground: 'var(--color-foreground)',
+        border: 'rgb(var(--color-border-rgb) / <alpha-value>)',
+        input: 'rgb(var(--color-input-rgb) / <alpha-value>)',
+        ring: 'rgb(var(--color-ring-rgb) / <alpha-value>)',
+        background: 'rgb(var(--color-background-rgb) / <alpha-value>)',
+        foreground: 'rgb(var(--color-foreground-rgb) / <alpha-value>)',
         primary: {
-          DEFAULT: 'var(--color-primary)', // blue-600
-          foreground: 'var(--color-primary-foreground)', // white
+          DEFAULT: 'rgb(var(--color-primary-rgb) / <alpha-value>)',
+          foreground: 'rgb(var(--color-primary-foreground-rgb) / <alpha-value>)',
         },
         secondary: {
-          DEFAULT: 'var(--color-secondary)', // violet-600
-          foreground: 'var(--color-secondary-foreground)', // white
+          DEFAULT: 'rgb(var(--color-secondary-rgb) / <alpha-value>)',
+          foreground: 'rgb(var(--color-secondary-foreground-rgb) / <alpha-value>)',
         },
         accent: {
-          DEFAULT: 'var(--color-accent)', // amber-500
-          foreground: 'var(--color-accent-foreground)', // gray-800
+          DEFAULT: 'rgb(var(--color-accent-rgb) / <alpha-value>)',
+          foreground: 'rgb(var(--color-accent-foreground-rgb) / <alpha-value>)',
         },
         destructive: {
-          DEFAULT: 'var(--color-destructive)', // red-600
-          foreground: 'var(--color-destructive-foreground)', // white
+          DEFAULT: 'rgb(var(--color-destructive-rgb) / <alpha-value>)',
+          foreground: 'rgb(var(--color-destructive-foreground-rgb) / <alpha-value>)',
         },
         success: {
-          DEFAULT: 'var(--color-success)', // emerald-600
-          foreground: 'var(--color-success-foreground)', // white
+          DEFAULT: 'rgb(var(--color-success-rgb) / <alpha-value>)',
+          foreground: 'rgb(var(--color-success-foreground-rgb) / <alpha-value>)',
         },
         warning: {
-          DEFAULT: 'var(--color-warning)', // amber-600
-          foreground: 'var(--color-warning-foreground)', // white
+          DEFAULT: 'rgb(var(--color-warning-rgb) / <alpha-value>)',
+          foreground: 'rgb(var(--color-warning-foreground-rgb) / <alpha-value>)',
         },
         error: {
-          DEFAULT: 'var(--color-error)', // red-600
-          foreground: 'var(--color-error-foreground)', // white
+          DEFAULT: 'rgb(var(--color-error-rgb) / <alpha-value>)',
+          foreground: 'rgb(var(--color-error-foreground-rgb) / <alpha-value>)',
         },
         muted: {
-          DEFAULT: 'var(--color-muted)', // gray-100
-          foreground: 'var(--color-muted-foreground)', // gray-500
+          DEFAULT: 'rgb(var(--color-muted-rgb) / <alpha-value>)',
+          foreground: 'rgb(var(--color-muted-foreground-rgb) / <alpha-value>)',
         },
         card: {
-          DEFAULT: 'var(--color-card)', // white
-          foreground: 'var(--color-card-foreground)', // gray-700
+          DEFAULT: 'rgb(var(--color-card-rgb) / <alpha-value>)',
+          foreground: 'rgb(var(--color-card-foreground-rgb) / <alpha-value>)',
         },
         popover: {
-          DEFAULT: 'var(--color-popover)', // white
-          foreground: 'var(--color-popover-foreground)', // gray-700
+          DEFAULT: 'rgb(var(--color-popover-rgb) / <alpha-value>)',
+          foreground: 'rgb(var(--color-popover-foreground-rgb) / <alpha-value>)',
         },
       },
       borderRadius: {

@@ -15,7 +15,10 @@ export const CourseProvider = ({ children }) => {
             lastUpdated: new Date().toISOString().split('T')[0],
             lessonsCount: newCourse.curriculum?.length || 0,
             status: newCourse.isPublished ? 'Published' : 'Draft',
-            image: newCourse.thumbnail || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80'
+            image: newCourse.thumbnail || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80',
+            views: 0,
+            duration: newCourse.duration || '0h 00m',
+            tags: Array.isArray(newCourse.tags) ? newCourse.tags : [],
         };
         setCourses([courseWithId, ...courses]);
         return courseWithId;

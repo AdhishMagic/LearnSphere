@@ -61,8 +61,8 @@ const UsageMetrics = ({ data }) => {
 
                 <div className="h-64 flex items-end justify-between gap-2 md:gap-4 px-2">
                     {data.courseAccess.map((item, index) => (
-                        <div key={index} className="flex-1 flex flex-col items-center gap-2 group">
-                            <div className="w-full bg-muted/30 rounded-t-lg relative h-full flex items-end overflow-hidden group-hover:bg-muted/50 transition-colors">
+                        <div key={index} className="flex-1 flex flex-col items-center gap-2 group h-full">
+                            <div className="w-full flex-1 bg-muted/30 rounded-t-lg relative flex items-end overflow-hidden group-hover:bg-muted/50 transition-colors">
                                 <div
                                     className="w-full bg-primary/80 group-hover:bg-primary transition-all duration-500 rounded-t-lg"
                                     style={{ height: `${item.value}%` }}

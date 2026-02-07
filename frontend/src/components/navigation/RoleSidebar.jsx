@@ -30,8 +30,13 @@ const RoleSidebar = ({ isCollapsed = false, onToggleCollapse, activeRole = 'lear
         {
           title: 'System',
           items: [
-            { label: 'Settings', path: '/admin/settings', icon: 'Settings' },
             { label: 'Reports', path: '/admin/reports', icon: 'FileText' },
+          ],
+        },
+        {
+          title: 'Account',
+          items: [
+            { label: 'Profile', path: '/profile?role=admin', icon: 'User' },
           ],
         },
       ],
@@ -57,24 +62,14 @@ const RoleSidebar = ({ isCollapsed = false, onToggleCollapse, activeRole = 'lear
         {
           title: 'Learning',
           items: [
-            { label: 'My Courses', path: '/learner-courses-listing', icon: 'BookOpen' },
-            { label: 'Course Details', path: '/learner/course-details', icon: 'FileText' },
-            { label: 'Lesson Player', path: '/learner/lesson-player', icon: 'Play' },
-          ],
-        },
-        {
-          title: 'Progress',
-          items: [
-            { label: 'My Progress', path: '/learner/progress', icon: 'TrendingUp' },
-            { label: 'Achievements', path: '/learner/achievements', icon: 'Award' },
-            { label: 'Quiz Attempts', path: '/learner/quiz-attempts', icon: 'ClipboardCheck' },
+            { label: 'My Courses', path: '/my-courses', icon: 'BookOpen' },
+            { label: 'Browse Courses', path: '/courses', icon: 'Search' },
           ],
         },
         {
           title: 'Account',
           items: [
-            { label: 'Profile', path: '/learner/profile', icon: 'User' },
-            { label: 'Settings', path: '/learner/settings', icon: 'Settings' },
+            { label: 'Profile', path: '/profile?role=learner', icon: 'User' },
           ],
         },
       ],

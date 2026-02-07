@@ -6,7 +6,6 @@ const CourseCard = ({ course }) => {
 
     const handleViewCourse = () => {
         console.log(`Navigating to course detail: ${course.id} - ${course.title}`);
-        // Navigate to Course Detail Page
         navigate(`/course/${course.id}`, {
             state: {
                 from: '/courses',
@@ -17,52 +16,57 @@ const CourseCard = ({ course }) => {
 
     return (
         <div
-            className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer group"
+            className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-elevation-2 transition-all duration-300 cursor-pointer group flex flex-col h-full"
             onClick={handleViewCourse}
         >
             {/* Course Cover Image */}
-            <div className="relative h-48 bg-gray-200 overflow-hidden">
+            <div className="relative h-44 sm:h-48 bg-muted overflow-hidden">
                 <img
                     src={course.coverImage}
                     alt={course.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 {/* Published Badge */}
-                <div className="absolute top-3 right-3 bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded">
+                <div className="absolute top-3 right-3 bg-success text-success-foreground text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md shadow-sm">
                     Published
                 </div>
             </div>
 
             {/* Course Content */}
-            <div className="p-5">
+            <div className="p-4 sm:p-5 flex flex-col flex-1">
                 {/* Title */}
-                <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-1">
                     {course.title}
                 </h3>
 
                 {/* Description */}
-                <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-1">
                     {course.description}
                 </p>
 
                 {/* Instructor */}
-                <p className="text-xs text-gray-500 mb-3">
-                    by <span className="font-medium">{course.instructor}</span>
-                </p>
+                <div className="flex items-center gap-2 mb-4">
+                    <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
+                        {course.instructor.charAt(0)}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                        by <span className="font-semibold text-foreground">{course.instructor}</span>
+                    </p>
+                </div>
 
                 {/* Tags */}
-                <div className="flex flex-wrap gap-2 mb-4">
-                    {course.tags.slice(0, 3).map((tag, index) => (
+                <div className="flex flex-wrap gap-2 mb-5">
+                    {course.tags.slice(0, 2).map((tag, index) => (
                         <span
                             key={index}
-                            className="inline-block bg-blue-50 text-blue-700 text-xs font-medium px-2.5 py-1 rounded-full"
+                            className="inline-block bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full"
                         >
                             {tag}
                         </span>
                     ))}
-                    {course.tags.length > 3 && (
-                        <span className="inline-block bg-gray-100 text-gray-600 text-xs font-medium px-2.5 py-1 rounded-full">
-                            +{course.tags.length - 3} more
+                    {course.tags.length > 2 && (
+                        <span className="inline-block bg-muted text-muted-foreground text-[10px] font-medium px-2 py-0.5 rounded-full">
+                            +{course.tags.length - 2}
                         </span>
                     )}
                 </div>
@@ -73,7 +77,7 @@ const CourseCard = ({ course }) => {
                         e.stopPropagation();
                         handleViewCourse();
                     }}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors duration-200"
+                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 active:scale-[0.98] shadow-sm"
                 >
                     View Course
                 </button>

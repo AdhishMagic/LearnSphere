@@ -13,12 +13,12 @@ import AdminCoursesPage from './pages/admin-courses';
 import AdminUsersPage from './pages/admin-users';
 import AdminReportsPage from './pages/admin-reports';
 import AdminAnalyticsPage from './pages/admin-analytics/AdminAnalyticsPage';
-import AdminSettingsPage from './pages/admin-settings/AdminSettingsPage';
 import InstructorCoursesPage from './pages/instructor-courses';
 import InstructorReportsPage from './pages/instructor-reports';
 import CourseForm from './pages/course-form';
 import MyCoursesPage from './pages/my-courses';
 import CourseLearningPage from './pages/course-learning';
+import ProfilePage from './pages/profile';
 
 const Routes = () => {
   return (
@@ -36,13 +36,13 @@ const Routes = () => {
           <Route path="/admin/users" element={<AdminUsersPage />} />
           <Route path="/admin/reports" element={<AdminReportsPage />} />
           <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
-          <Route path="/admin/settings" element={<AdminSettingsPage />} />
           <Route path="/instructor/courses" element={<InstructorCoursesPage />} />
           <Route path="/instructor/courses/create" element={<CourseForm />} />
           <Route path="/instructor/courses/edit/:courseId" element={<CourseForm />} />
           <Route path="/instructor/reports" element={<InstructorReportsPage />} />
           <Route path="/my-courses" element={<MyCoursesPage />} />
           <Route path="/course/:courseId" element={<CourseLearningPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
           <Route path="*" element={<NotFound />} />
         </RouterRoutes>
       </ErrorBoundary>

@@ -2,19 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
+import Icon from '../../../components/AppIcon';
 
 const EditUserModal = ({ isOpen, onClose, onSave, user }) => {
     const [formData, setFormData] = useState({
         name: '',
-        email: ''
+        email: '',
+        password: ''
     });
+    const [showPassword, setShowPassword] = useState(false);
     const [errors, setErrors] = useState({});
 
     useEffect(() => {
         if (user) {
             setFormData({
                 name: user.name,
-                email: user.email
+                email: user.email,
+                password: ''
             });
         }
     }, [user]);
@@ -25,6 +29,10 @@ const EditUserModal = ({ isOpen, onClose, onSave, user }) => {
         const newErrors = {};
         if (!formData.name.trim()) newErrors.name = 'Name is required';
         if (!formData.email.trim()) newErrors.email = 'Email is required';
+
+        if (formData.password && formData.password.length < 6) {
+            newErrors.password = 'Password must be at least 6 characters';
+        }
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -66,6 +74,26 @@ const EditUserModal = ({ isOpen, onClose, onSave, user }) => {
                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                             error={errors.email}
                         />
+                    </div>
+
+                    <div className="relative">
+                        <Input
+                            label="New Password (optional)"
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Leave blank to keep current"
+                            value={formData.password}
+                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                            error={errors.password}
+                            helperText="Enter a new password to reset it for the user."
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-9 text-muted-foreground hover:text-foreground transition-colors"
+                            aria-label={showPassword ? "Hide password" : "Show password"}
+                        >
+                            <Icon name={showPassword ? "EyeOff" : "Eye"} size={20} />
+                        </button>
                     </div>
 
                     <div className="flex justify-end gap-3 pt-2">

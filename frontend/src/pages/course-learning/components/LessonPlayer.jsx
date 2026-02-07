@@ -100,7 +100,7 @@ const LessonPlayer = ({
     };
 
     return (
-        <div className="min-h-screen bg-gray-100">
+        <div className="min-h-screen bg-background">
             {/* Sidebar */}
             <PlayerSidebar
                 course={course}
@@ -111,20 +111,28 @@ const LessonPlayer = ({
             />
 
             {/* Main Content Area */}
-            <div className={`transition-all duration-300 ${sidebarCollapsed ? 'ml-0' : 'lg:ml-80'
-                }`}>
+            <div
+                className={`
+                    transition-all duration-300 ease-out min-h-screen
+                    ${sidebarCollapsed ? 'lg:ml-0' : 'lg:ml-80'}
+                `}
+            >
                 {/* Header */}
-                <div className="bg-white border-b border-gray-200 px-6 py-4">
-                    <h1 className="text-xl font-bold text-gray-900">
-                        {currentLesson.title}
-                    </h1>
-                    <p className="text-sm text-gray-500 mt-1">
-                        {currentLesson.description}
-                    </p>
+                <div className="bg-card border-b border-border px-4 sm:px-6 py-4 sm:py-5 sticky top-0 z-20">
+                    <div className="max-w-4xl mx-auto">
+                        <h1 className="text-lg sm:text-xl font-bold text-foreground leading-tight">
+                            {currentLesson.title}
+                        </h1>
+                        {currentLesson.description && (
+                            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                                {currentLesson.description}
+                            </p>
+                        )}
+                    </div>
                 </div>
 
                 {/* Content */}
-                <div className="p-6">
+                <div className="p-4 sm:p-6 lg:p-8">
                     <div className="max-w-4xl mx-auto">
                         {renderMainContent()}
                     </div>

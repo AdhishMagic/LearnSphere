@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import RoleSidebar from '../../components/navigation/RoleSidebar';
 import BreadcrumbTracker from '../../components/navigation/BreadcrumbTracker';
 import Button from '../../components/ui/Button';
@@ -11,6 +12,7 @@ import EditCourseModal from './components/EditCourseModal';
 import { MOCK_COURSES, MOCK_INSTRUCTORS } from './mockData';
 
 const AdminCoursesPage = () => {
+    const navigate = useNavigate();
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
     // State for data and filters
@@ -106,7 +108,14 @@ const AdminCoursesPage = () => {
                             <h1 className="text-2xl md:text-3xl font-bold mb-2">Courses Management</h1>
                             <p className="text-muted-foreground">Manage all courses across the platform.</p>
                         </div>
-                        <Button className="shrink-0" iconName="Plus">
+                        <Button
+                            className="shrink-0"
+                            iconName="Plus"
+                            onClick={() => {
+                                console.log('[Admin] Creating new course');
+                                navigate('/instructor/courses/create?role=admin');
+                            }}
+                        >
                             Create Course
                         </Button>
                     </div>

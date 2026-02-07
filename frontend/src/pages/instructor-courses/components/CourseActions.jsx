@@ -1,14 +1,25 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Button from '../../../components/ui/Button';
 import { Edit, Share2 } from 'lucide-react';
 
-const CourseActions = ({ courseId }) => {
+const CourseActions = ({ courseId, sharePath = '/course' }) => {
+    const navigate = useNavigate();
+
     const handleEdit = () => {
-        console.log(`Edit course ${courseId}`);
+        navigate(`/instructor/courses/edit/${courseId}`);
     };
 
-    const handleShare = () => {
-        console.log(`Share course ${courseId}`);
+    const handleShare = async () => {
+        const url = `${window.location.origin}${sharePath}/${courseId}`;
+
+        try {
+            await navigator.clipboard.writeText(url);
+            window.alert('Course link copied to clipboard');
+        } catch {
+            // Fallback for environments where clipboard API is blocked
+            window.prompt('Copy this course link:', url);
+        }
     };
 
     return (

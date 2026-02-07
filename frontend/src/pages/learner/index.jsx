@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import RoleSidebar from '../../components/navigation/RoleSidebar';
-import BreadcrumbTracker from '../../components/navigation/BreadcrumbTracker';
+import LearnerNavbar from '../../components/navigation/LearnerNavbar';
 import FilterPanel from './components/FilterPanel';
 import CourseGrid from './components/CourseGrid';
 import EnrollmentModal from './components/EnrollmentModal';
@@ -8,7 +7,6 @@ import Icon from '../../components/AppIcon';
 
 
 const LearnerCoursesListing = () => {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [enrolledCourses, setEnrolledCourses] = useState([1, 3, 7]);
   const [selectedCourse, setSelectedCourse] = useState(null);
@@ -408,17 +406,11 @@ const LearnerCoursesListing = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <RoleSidebar
-        isCollapsed={isSidebarCollapsed}
-        onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)} />
+      {/* Learner Navigation */}
+      <LearnerNavbar />
 
-      <main
-        className={`transition-smooth ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-60'}`
-        }>
-
-        <div className="px-4 md:px-6 lg:px-8 py-6 md:py-8 lg:py-10 max-w-[1920px] mx-auto">
-          <BreadcrumbTracker />
-
+      <main>
+        <div className="px-4 md:px-6 lg:px-8 py-6 md:py-8 lg:py-10 max-w-7xl mx-auto">
           <div className="mb-6 md:mb-8">
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-2">
               Discover Courses
