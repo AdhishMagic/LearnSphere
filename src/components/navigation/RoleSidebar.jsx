@@ -3,12 +3,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Icon from '../AppIcon';
 import Button from '../ui/Button';
 
-const RoleSidebar = ({ isCollapsed = false, onToggleCollapse }) => {
+const RoleSidebar = ({ isCollapsed = false, onToggleCollapse, activeRole = 'learner' }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-  const userRole = 'learner';
+  // const userRole = 'learner'; // REMOVED hardcoded role
 
   const navigationConfig = {
     admin: {
@@ -90,7 +90,7 @@ const RoleSidebar = ({ isCollapsed = false, onToggleCollapse }) => {
     },
   };
 
-  const currentNav = navigationConfig?.[userRole] || navigationConfig?.learner;
+  const currentNav = navigationConfig?.[activeRole] || navigationConfig?.learner;
 
   const handleNavigation = (path) => {
     navigate(path);

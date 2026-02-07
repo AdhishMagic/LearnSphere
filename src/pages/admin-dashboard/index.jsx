@@ -42,14 +42,15 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <RoleSidebar 
-        isCollapsed={isSidebarCollapsed} 
+      <RoleSidebar
+        isCollapsed={isSidebarCollapsed}
         onToggleCollapse={handleToggleSidebar}
+        activeRole="admin"
       />
       <main className={`transition-all duration-250 ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-60'}`}>
         <div className="px-4 md:px-6 lg:px-8 py-6 md:py-8">
           <BreadcrumbTracker />
-          
+
           {/* Header Section */}
           <div className="mb-6 md:mb-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
@@ -111,12 +112,12 @@ const AdminDashboard = () => {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-accent/10 flex items-center justify-center">
-                  <Icon name="DollarSign" size={20} color="var(--color-accent)" />
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-success/10 flex items-center justify-center">
+                  <Icon name="UserCheck" size={20} color="var(--color-success)" />
                 </div>
                 <div>
-                  <p className="text-xs md:text-sm text-muted-foreground">Revenue</p>
-                  <p className="text-base md:text-lg font-bold text-foreground data-text">$1.2M</p>
+                  <p className="text-xs md:text-sm text-muted-foreground">Active Users</p>
+                  <p className="text-base md:text-lg font-bold text-foreground data-text">12,456</p>
                 </div>
               </div>
             </div>
@@ -130,10 +131,9 @@ const AdminDashboard = () => {
                   <button
                     key={tab?.id}
                     onClick={() => setActiveTab(tab?.id)}
-                    className={`flex items-center gap-2 px-4 md:px-6 py-3 md:py-4 text-sm md:text-base font-medium transition-smooth whitespace-nowrap ${
-                      activeTab === tab?.id
-                        ? 'text-primary border-b-2 border-primary' :'text-muted-foreground hover:text-foreground'
-                    }`}
+                    className={`flex items-center gap-2 px-4 md:px-6 py-3 md:py-4 text-sm md:text-base font-medium transition-smooth whitespace-nowrap ${activeTab === tab?.id
+                      ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+                      }`}
                   >
                     <Icon name={tab?.icon} size={18} />
                     <span>{tab?.label}</span>

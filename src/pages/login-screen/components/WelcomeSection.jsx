@@ -1,7 +1,7 @@
 import React from 'react';
 import Icon from '../../../components/AppIcon';
 
-const WelcomeSection = () => {
+const WelcomeSection = ({ onRegister }) => {
   const features = [
     {
       icon: "BookOpen",
@@ -52,7 +52,10 @@ const WelcomeSection = () => {
           <Icon name="Info" size={18} />
           <p>
             New to LearnSphere?{' '}
-            <button className="text-primary hover:text-primary/80 font-medium transition-colors">
+            <button
+              onClick={onRegister}
+              className="text-primary hover:text-primary/80 font-medium transition-colors"
+            >
               Create an account
             </button>
           </p>
