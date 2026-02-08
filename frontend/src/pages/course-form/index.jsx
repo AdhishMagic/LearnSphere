@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Save, ChevronLeft, Shield, Menu } from 'lucide-react';
 import InstructorNavbar from '../../components/navigation/InstructorNavbar';
 import Button from '../../components/ui/Button';
@@ -8,19 +8,14 @@ import CourseBasics from './components/CourseBasics';
 import CurriculumManager from './components/CurriculumManager';
 import CourseDescription from './components/CourseDescription';
 import CourseOptions from './components/CourseOptions';
-import QuizManager from './components/QuizManager';
 import PublishPanel from './components/PublishPanel';
-import { useCourse } from '../../context/CourseContext';
 
 const CourseForm = () => {
     const { courseId } = useParams();
     const navigate = useNavigate();
-    const location = useLocation();
-    const { getCourse, addCourse, updateCourse } = useCourse();
 
-    // Detect if admin is accessing this page
-    const searchParams = new URLSearchParams(location.search);
-    const isAdminMode = searchParams.get('role') === 'admin';
+    const userRole = localStorage.getItem('role');
+    const isAdminMode = userRole === 'admin';
     const backRoute = isAdminMode ? '/admin/courses' : '/instructor/courses';
 
     // State
@@ -28,6 +23,20 @@ const CourseForm = () => {
     const [courseData, setCourseData] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+
+    const requestWithTimeout = async (url, options, timeoutMs = 15000) => {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+        try {
+            return await fetch(url, { ...options, signal: controller.signal });
+        } finally {
+            clearTimeout(timeoutId);
+        }
+    };
 
     // Navigation Flow
     const SECTIONS = ['basics', 'curriculum', 'description', 'options', 'publish'];
@@ -35,53 +44,157 @@ const CourseForm = () => {
 
     // Load initial data
     useEffect(() => {
-        if (courseId) {
-            const existingCourse = getCourse(courseId);
-            if (existingCourse) {
-                console.log(`Loading course ${courseId}...`);
-                setCourseData(existingCourse);
-                setMaxAccessedSectionIndex(SECTIONS.length - 1);
-            } else {
-                console.error('Course not found');
-                navigate(backRoute);
+        const loadCourse = async () => {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                alert('You need to log in to manage courses.');
+                setIsLoading(false);
+                return;
             }
-        } else {
-            console.log('Initializing new course...');
-            setCourseData({
-                title: '',
-                subtitle: '',
-                thumbnail: '',
-                description: '',
-                instructor: 'Current Instructor',
-                website: '',
-                tags: [],
-                requirements: [],
-                outcomes: [],
-                visibility: 'everyone',
-                access: 'open',
-                price: 0,
-                isPublished: false,
-                curriculum: []
-            });
-        }
-    }, [courseId, getCourse, navigate, backRoute]);
 
-    const handleSave = () => {
-        setIsSaving(true);
-        setTimeout(() => {
             if (courseId) {
-                updateCourse(courseId, courseData);
-                console.log('Updated Course:', courseData);
+                try {
+                    const response = await requestWithTimeout(`${API_BASE_URL}/api/v1/courses/${courseId}`, {
+                        method: 'GET',
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        const message = errorData?.detail || 'Unable to load course.';
+                        alert(message);
+                        navigate(backRoute);
+                        return;
+                    }
+
+                    const data = await response.json();
+                    setCourseData(data);
+                    setMaxAccessedSectionIndex(SECTIONS.length - 1);
+                } catch (error) {
+                    alert('Unable to load course.');
+                    navigate(backRoute);
+                } finally {
+                    setIsLoading(false);
+                }
             } else {
-                addCourse(courseData);
-                console.log('Created Course:', courseData);
+                setCourseData({
+                    title: '',
+                    subtitle: '',
+                    thumbnail: '',
+                    description: '',
+                    instructor: '',
+                    website: '',
+                    tags: [],
+                    requirements: [],
+                    outcomes: [],
+                    visibility: 'everyone',
+                    access: 'open',
+                    price: 0,
+                    isPublished: false,
+                    curriculum: []
+                });
+                setIsLoading(false);
             }
-            setIsSaving(false);
+        };
+
+        loadCourse();
+    }, [API_BASE_URL, courseId, navigate, backRoute]);
+
+    const handleSave = async () => {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            alert('You need to log in to save courses.');
+            return;
+        }
+
+        const payload = {
+            ...courseData,
+            title: courseData?.title?.trim() || null,
+            subtitle: courseData?.subtitle?.trim() || null,
+            description: courseData?.description?.trim() || null,
+            instructor: courseData?.instructor?.trim() || null,
+            website: courseData?.website?.trim() || null
+        };
+
+        setIsSaving(true);
+        try {
+            const response = await requestWithTimeout(
+                courseId
+                    ? `${API_BASE_URL}/api/v1/courses/${courseId}`
+                    : `${API_BASE_URL}/api/v1/courses`,
+                {
+                    method: courseId ? 'PATCH' : 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                }
+            );
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                const message = errorData?.detail || 'Unable to save course.';
+                alert(message);
+                return;
+            }
+
+            const data = await response.json();
+            setCourseData(data);
             navigate(backRoute);
-        }, 800);
+        } catch (error) {
+            const message = error?.name === 'AbortError'
+                ? 'Save timed out. Please try again.'
+                : 'Unable to save course.';
+            alert(message);
+        } finally {
+            setIsSaving(false);
+        }
     };
 
-    if (!courseData) {
+    const handlePublish = async () => {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            alert('You need to log in to publish courses.');
+            return;
+        }
+
+        if (!courseId) {
+            alert('Please save the course before publishing.');
+            return;
+        }
+
+        setIsSaving(true);
+        try {
+            const response = await requestWithTimeout(`${API_BASE_URL}/api/v1/courses/${courseId}/publish`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                const message = errorData?.detail || 'Unable to publish course.';
+                alert(message);
+                return;
+            }
+
+            const data = await response.json();
+            setCourseData(data);
+        } catch (error) {
+            const message = error?.name === 'AbortError'
+                ? 'Publish timed out. Please try again.'
+                : 'Unable to publish course.';
+            alert(message);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    if (isLoading || !courseData) {
         return (
             <div className="min-h-screen bg-background flex items-center justify-center">
                 <div className="flex flex-col items-center gap-3">
@@ -111,13 +224,33 @@ const CourseForm = () => {
             case 'basics':
                 return <CourseBasics {...commonProps} onNext={() => handleNext('basics')} />;
             case 'curriculum':
-                return <CurriculumManager {...commonProps} onNavigate={setActiveSection} onNext={() => handleNext('curriculum')} />;
+                return (
+                    <CurriculumManager
+                        {...commonProps}
+                        onNavigate={setActiveSection}
+                        onNext={() => handleNext('curriculum')}
+                        courseId={courseId || courseData?.id || null}
+                    />
+                );
             case 'description':
                 return <CourseDescription {...commonProps} onNavigate={setActiveSection} onNext={() => handleNext('description')} />;
             case 'options':
                 return <CourseOptions {...commonProps} onNavigate={setActiveSection} onNext={() => handleNext('options')} />;
             case 'publish':
-                return <PublishPanel {...commonProps} onNavigate={setActiveSection} />;
+                return (
+                    <PublishPanel
+                        {...commonProps}
+                        onNavigate={setActiveSection}
+                        onPublish={handlePublish}
+                        onPreview={() => {
+                            if (!courseId) {
+                                alert('Please save the course before previewing.');
+                                return;
+                            }
+                            window.open(`/course/${courseId}?preview=1`, '_blank');
+                        }}
+                    />
+                );
             default:
                 return <CourseBasics {...commonProps} onNext={() => handleNext('basics')} />;
         }
@@ -211,7 +344,13 @@ const CourseForm = () => {
                         variant="outline"
                         size="sm"
                         className="hidden sm:inline-flex"
-                        onClick={() => window.open('/preview', '_blank')}
+                        onClick={() => {
+                            if (!courseId) {
+                                alert('Please save the course before previewing.');
+                                return;
+                            }
+                            window.open(`/course/${courseId}?preview=1`, '_blank');
+                        }}
                     >
                         Preview
                     </Button>

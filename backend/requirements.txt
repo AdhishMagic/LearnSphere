@@ -6,3 +6,5 @@ pydantic-settings
 passlib[bcrypt]
 bcrypt<4.0.0
 python-jose
+python-multipart
+aiofiles

@@ -1,51 +1,124 @@
-import React, { createContext, useState, useContext } from 'react';
-import mockCourses from '../pages/instructor-courses/mockData';
+import React, { createContext, useEffect, useState, useContext } from 'react';
 
 const CourseContext = createContext();
 
 export const useCourse = () => useContext(CourseContext);
 
 export const CourseProvider = ({ children }) => {
-    const [courses, setCourses] = useState(mockCourses);
+    const [courses, setCourses] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const addCourse = (newCourse) => {
-        const courseWithId = {
-            ...newCourse,
-            id: Date.now(), // Simple ID generation
-            lastUpdated: new Date().toISOString().split('T')[0],
-            lessonsCount: newCourse.curriculum?.length || 0,
-            status: newCourse.isPublished ? 'Published' : 'Draft',
-            image: newCourse.thumbnail || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80',
-            views: 0,
-            duration: newCourse.duration || '0h 00m',
-            tags: Array.isArray(newCourse.tags) ? newCourse.tags : [],
-        };
-        setCourses([courseWithId, ...courses]);
-        return courseWithId;
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+
+    const fetchCourses = async () => {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            setIsLoading(false);
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/v1/courses/instructor/me`, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                alert(errorData?.detail || 'Unable to load courses.');
+                setIsLoading(false);
+                return;
+            }
+
+            const data = await response.json();
+            setCourses(data || []);
+        } catch (error) {
+            alert('Unable to load courses.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    const updateCourse = (id, updatedData) => {
-        setCourses(courses.map(course =>
-            course.id === parseInt(id) ? {
-                ...course,
-                ...updatedData,
-                lastUpdated: new Date().toISOString().split('T')[0],
-                lessonsCount: updatedData.curriculum?.length || 0,
-                status: updatedData.isPublished ? 'Published' : 'Draft'
-            } : course
-        ));
+    useEffect(() => {
+        fetchCourses();
+    }, []);
+
+    const addCourse = async (newCourse) => {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            alert('You need to log in to create courses.');
+            return null;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/v1/courses`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify(newCourse)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                alert(errorData?.detail || 'Unable to create course.');
+                return null;
+            }
+
+            const data = await response.json();
+            setCourses(prev => [data, ...prev]);
+            return data;
+        } catch (error) {
+            alert('Unable to create course.');
+            return null;
+        }
     };
 
-    const deleteCourse = (id) => {
-        setCourses(courses.filter(course => course.id !== id));
+    const updateCourse = async (id, updatedData) => {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            alert('You need to log in to update courses.');
+            return null;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/v1/courses/${id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify(updatedData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                alert(errorData?.detail || 'Unable to update course.');
+                return null;
+            }
+
+            const data = await response.json();
+            setCourses(prev => prev.map(course => course.id === data.id ? data : course));
+            return data;
+        } catch (error) {
+            alert('Unable to update course.');
+            return null;
+        }
+    };
+
+    const deleteCourse = () => {
+        alert('Course deletion is not available.');
     };
 
     const getCourse = (id) => {
-        return courses.find(course => course.id === parseInt(id));
+        return courses.find(course => String(course.id) === String(id));
     };
 
     return (
-        <CourseContext.Provider value={{ courses, addCourse, updateCourse, deleteCourse, getCourse }}>
+        <CourseContext.Provider value={{ courses, isLoading, addCourse, updateCourse, deleteCourse, getCourse, fetchCourses }}>
             {children}
         </CourseContext.Provider>
     );

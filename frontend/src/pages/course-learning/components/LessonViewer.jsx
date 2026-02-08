@@ -5,6 +5,17 @@ const LessonViewer = ({ lesson, onStartQuiz }) => {
     const renderContent = () => {
         switch (lesson.type) {
             case 'video':
+                if (lesson.videoUrl && !lesson.videoUrl.includes('youtube') && !lesson.videoUrl.includes('vimeo')) {
+                    return (
+                        <div className="bg-gray-900 rounded-xl overflow-hidden shadow-lg">
+                            <video
+                                src={lesson.videoUrl}
+                                controls
+                                className="w-full h-full"
+                            />
+                        </div>
+                    );
+                }
                 return (
                     <div className="aspect-video bg-gray-900 rounded-xl overflow-hidden shadow-lg">
                         <iframe
@@ -30,7 +41,10 @@ const LessonViewer = ({ lesson, onStartQuiz }) => {
                         <p className="text-gray-600 mb-4">
                             This is a document lesson. In production, a PDF viewer would be embedded here.
                         </p>
-                        <button className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-medium px-6 py-3 rounded-lg transition-colors">
+                        <button
+                            onClick={() => lesson.documentUrl && window.open(lesson.documentUrl, '_blank')}
+                            className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-medium px-6 py-3 rounded-lg transition-colors"
+                        >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>

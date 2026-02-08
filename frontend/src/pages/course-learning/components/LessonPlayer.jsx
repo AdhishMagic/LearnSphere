@@ -4,7 +4,6 @@ import LessonViewer from './LessonViewer';
 import NavigationControls from './NavigationControls';
 import QuizIntro from './QuizIntro';
 import QuizQuestion from './QuizQuestion';
-import { getNextLesson } from '../mockData';
 
 const LessonPlayer = ({
     course,
@@ -21,7 +20,11 @@ const LessonPlayer = ({
     const [quizState, setQuizState] = useState('idle'); // idle | intro | question
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
-    const hasNextLesson = getNextLesson(currentLesson.id) !== null;
+    const currentIndex = course.lessons.findIndex(l => l.id === currentLesson.id);
+    const nextLesson = currentIndex >= 0 && currentIndex < course.lessons.length - 1
+        ? course.lessons[currentIndex + 1]
+        : null;
+    const hasNextLesson = nextLesson !== null;
 
     // Handle lesson change from sidebar
     const handleLessonClick = (selectedLesson) => {
@@ -34,7 +37,6 @@ const LessonPlayer = ({
 
     // Handle next content
     const handleNext = () => {
-        const nextLesson = getNextLesson(currentLesson.id);
         if (nextLesson) {
             handleLessonClick(nextLesson);
             onNextLesson(nextLesson);

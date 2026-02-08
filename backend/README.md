@@ -25,7 +25,7 @@ Update `.env` if needed:
 
 ### 4) Run the server
 ```powershell
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 ## Endpoints

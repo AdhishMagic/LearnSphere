@@ -2,7 +2,7 @@ import React from 'react';
 import { Upload, Eye, AlertTriangle, CheckCircle, Users, Mail } from 'lucide-react';
 import Button from '../../../components/ui/Button';
 
-const PublishPanel = ({ data, onChange }) => {
+const PublishPanel = ({ data, onChange, onPublish, onPreview }) => {
     const isReadyToPublish = data.title && data.curriculum?.length > 0;
 
     // Calculate completeness (simple mock logic)
@@ -19,6 +19,14 @@ const PublishPanel = ({ data, onChange }) => {
 
     const handlePublishToggle = () => {
         if (!isReadyToPublish) return;
+        if (data.isPublished) {
+            alert('Unpublishing is not available.');
+            return;
+        }
+        if (onPublish) {
+            onPublish();
+            return;
+        }
         onChange({ ...data, isPublished: !data.isPublished });
     };
 
@@ -77,7 +85,10 @@ const PublishPanel = ({ data, onChange }) => {
 
             {/* Actions Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-5 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer group">
+                <div
+                    className="p-5 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer group"
+                    onClick={() => onPreview && onPreview()}
+                >
                     <div className="flex items-center gap-3 mb-2 text-gray-800 font-medium group-hover:text-primary">
                         <Eye size={20} />
                         Preview as Learner

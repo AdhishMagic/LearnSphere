@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import ReviewCard from './ReviewCard';
-import { getAverageRating } from '../mockData';
 
 const ReviewsSection = ({ reviews, learner }) => {
     const [showAddReview, setShowAddReview] = useState(false);
-    const averageRating = getAverageRating();
+    const averageRating = reviews.length
+        ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
+        : '0.0';
 
     const handleAddReview = () => {
         if (!learner.isLoggedIn) {

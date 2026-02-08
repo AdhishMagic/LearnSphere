@@ -5,7 +5,7 @@ import LessonEditorModal from './LessonEditorModal';
 import QuizEditorModal from './QuizEditorModal';
 import AddContentModal from './AddContentModal';
 
-const CurriculumManager = ({ data, onChange, onNavigate }) => {
+const CurriculumManager = ({ data, onChange, onNavigate, courseId }) => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isLessonModalOpen, setIsLessonModalOpen] = useState(false);
     const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
@@ -194,6 +194,7 @@ const CurriculumManager = ({ data, onChange, onNavigate }) => {
                 onClose={() => setIsLessonModalOpen(false)}
                 onSave={editingItem ? handleUpdateItem : handleAddItem}
                 lesson={editingItem}
+                courseId={courseId}
             />
 
             <QuizEditorModal

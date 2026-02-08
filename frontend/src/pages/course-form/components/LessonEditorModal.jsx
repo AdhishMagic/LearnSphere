@@ -1,19 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { X, Upload, FileText, Video, Image as ImageIcon, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
 
-const LessonEditorModal = ({ isOpen, onClose, onSave, lesson = null }) => {
+const LessonEditorModal = ({ isOpen, onClose, onSave, lesson = null, courseId = null }) => {
+    const fileInputRef = useRef(null);
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
         title: '',
         type: 'video',
         duration: '',
         content: '',
+        fileName: '',
         isFree: false,
         description: '',
         attachments: []
     });
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [uploadStatus, setUploadStatus] = useState('');
+
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
     useEffect(() => {
         if (isOpen) {
@@ -26,6 +33,7 @@ const LessonEditorModal = ({ isOpen, onClose, onSave, lesson = null }) => {
                     type: 'video',
                     duration: '',
                     content: '',
+                    fileName: '',
                     isFree: false,
                     description: '',
                     attachments: []
@@ -50,8 +58,231 @@ const LessonEditorModal = ({ isOpen, onClose, onSave, lesson = null }) => {
     };
 
     const handleSubmit = () => {
-        onSave({ ...formData, id: lesson ? lesson.id : Date.now() });
+        if (formData.type === 'document' && !formData.content) {
+            alert('Please upload a document before saving.');
+            return;
+        }
+
+        onSave({ ...formData, id: lesson ? lesson.id : (formData.id || Date.now()) });
         onClose();
+    };
+
+    const handleFileSelect = () => {
+        if (fileInputRef.current) {
+            fileInputRef.current.click();
+        }
+    };
+
+    const handleFileChange = async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        if (!courseId) {
+            return;
+        }
+
+        if (!formData.title?.trim()) {
+            alert('Please enter a lesson title before uploading.');
+            return;
+        }
+
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            alert('You need to log in to upload files.');
+            return;
+        }
+
+        setIsUploading(true);
+        setUploadProgress(0);
+        setUploadStatus('Preparing upload...');
+        try {
+            let lessonId = formData.id;
+            if (!lessonId) {
+                setUploadStatus('Creating draft lesson...');
+                const lessonResponse = await fetch(`${API_BASE_URL}/api/v1/lessons`, {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        courseId,
+                        title: formData.title.trim(),
+                        type: formData.type,
+                        description: formData.description || '',
+                        allowDownload: false
+                    })
+                });
+
+                if (!lessonResponse.ok) {
+                    const errorData = await lessonResponse.json().catch(() => ({}));
+                    const detail = typeof errorData?.detail === 'string' ? errorData.detail : null;
+                    const message = detail || errorData?.message || 'Unable to create lesson.';
+                    alert(message);
+                    return;
+                }
+
+                const lessonData = await lessonResponse.json();
+                lessonId = lessonData?._id || lessonData?.id;
+            }
+
+            if (!lessonId) {
+                alert('Unable to create lesson for upload.');
+                return;
+            }
+
+            let sessionId = formData.uploadSessionId;
+            let receivedBytes = 0;
+
+            if (sessionId) {
+                setUploadStatus('Checking upload session...');
+                const sessionCheck = await fetch(`${API_BASE_URL}/api/v1/uploads/sessions/${sessionId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                if (sessionCheck.ok) {
+                    const sessionData = await sessionCheck.json();
+                    if (sessionData?.fileSize === file.size) {
+                        receivedBytes = sessionData?.receivedBytes || 0;
+                        if (receivedBytes > 0) {
+                            const progress = Math.round((receivedBytes / file.size) * 100);
+                            setUploadProgress(progress);
+                            setUploadStatus('Resuming upload...');
+                        }
+                        setFormData(prev => ({
+                            ...prev,
+                            id: lessonId,
+                            uploadSessionId: sessionId,
+                        }));
+                    } else {
+                        sessionId = null;
+                    }
+                } else {
+                    sessionId = null;
+                }
+            }
+
+            if (!sessionId) {
+                setUploadStatus('Starting upload session...');
+                const sessionResponse = await fetch(`${API_BASE_URL}/api/v1/uploads/sessions`, {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        courseId,
+                        lessonId,
+                        fileName: file.name,
+                        fileSize: file.size,
+                        mimeType: file.type
+                    })
+                });
+
+                if (!sessionResponse.ok) {
+                    const errorData = await sessionResponse.json().catch(() => ({}));
+                    const detail = typeof errorData?.detail === 'string' ? errorData.detail : null;
+                    const message = detail || errorData?.message || 'Unable to start upload.';
+                    alert(message);
+                    return;
+                }
+
+                const sessionData = await sessionResponse.json();
+                sessionId = sessionData?.sessionId;
+                receivedBytes = sessionData?.receivedBytes || 0;
+                if (!sessionId) {
+                    alert('Upload session unavailable.');
+                    return;
+                }
+
+                setFormData(prev => ({
+                    ...prev,
+                    id: lessonId,
+                    uploadSessionId: sessionId,
+                }));
+            }
+
+            const chunkSize = 5 * 1024 * 1024;
+            const totalChunks = Math.ceil(file.size / chunkSize);
+            const startChunk = Math.floor(receivedBytes / chunkSize);
+
+            for (let index = startChunk; index < totalChunks; index += 1) {
+                setUploadStatus(`Uploading chunk ${index + 1} of ${totalChunks}...`);
+                const start = index * chunkSize;
+                const end = Math.min(start + chunkSize, file.size);
+                const chunk = file.slice(start, end);
+
+                const chunkPayload = new FormData();
+                chunkPayload.append('file', chunk, file.name);
+
+                const chunkResponse = await fetch(
+                    `${API_BASE_URL}/api/v1/uploads/sessions/${sessionId}/chunks?chunk_index=${index}`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        },
+                        body: chunkPayload
+                    }
+                );
+
+                if (!chunkResponse.ok) {
+                    const errorData = await chunkResponse.json().catch(() => ({}));
+                    const detail = typeof errorData?.detail === 'string' ? errorData.detail : null;
+                    const message = detail || errorData?.message || 'Upload failed.';
+                    alert(message);
+                    return;
+                }
+
+                const uploadedBytes = Math.min((index + 1) * chunkSize, file.size);
+                const progress = Math.round((uploadedBytes / file.size) * 100);
+                setUploadProgress(progress);
+            }
+
+            setUploadStatus('Finalizing upload...');
+            const completeResponse = await fetch(
+                `${API_BASE_URL}/api/v1/uploads/sessions/${sessionId}/complete`,
+                {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                }
+            );
+
+            if (!completeResponse.ok) {
+                const errorData = await completeResponse.json().catch(() => ({}));
+                const detail = typeof errorData?.detail === 'string' ? errorData.detail : null;
+                const message = detail || errorData?.message || 'Unable to finalize upload.';
+                alert(message);
+                return;
+            }
+
+            const completeData = await completeResponse.json();
+            const attachmentId = completeData?.attachmentId;
+            const contentUrl = attachmentId
+                ? `${API_BASE_URL}/api/v1/uploads/attachments/${attachmentId}`
+                : '';
+
+            setFormData(prev => ({
+                ...prev,
+                id: lessonId,
+                uploadSessionId: null,
+                content: contentUrl,
+                fileName: file.name,
+            }));
+            setUploadProgress(100);
+            setUploadStatus('Upload complete');
+        } catch (error) {
+            const message = typeof error?.message === 'string' ? error.message : 'Unable to upload file.';
+            alert(message);
+        } finally {
+            setIsUploading(false);
+        }
     };
 
     return (
@@ -168,16 +399,42 @@ const LessonEditorModal = ({ isOpen, onClose, onSave, lesson = null }) => {
                                 <div className="border-2 border-dashed rounded-lg p-8 flex flex-col items-center justify-center text-center bg-gray-50">
                                     <Upload size={32} className="text-gray-400 mb-2" />
                                     <p className="text-sm text-gray-500 mb-1">
-                                        {formData.content ? 'File Selected' : `Upload ${formData.type} file`}
+                                        {formData.fileName || (formData.content ? 'File Uploaded' : `Upload ${formData.type} file`)}
                                     </p>
                                     <Button
                                         type="button"
                                         variant="outline"
                                         size="sm"
-                                        onClick={() => setFormData({ ...formData, content: `uploaded_file_${Date.now()}` })}
+                                        onClick={handleFileSelect}
+                                        disabled={isUploading}
                                     >
-                                        {formData.content ? 'Change File' : 'Select File'}
+                                        {isUploading ? 'Uploading...' : (formData.content ? 'Change File' : 'Select File')}
                                     </Button>
+                                    {(isUploading || uploadProgress > 0) && (
+                                        <div className="w-full mt-4">
+                                            <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                                                <span>{uploadStatus || 'Uploading...'}</span>
+                                                <span>{uploadProgress}%</span>
+                                            </div>
+                                            <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                                                <div
+                                                    className="h-full bg-blue-600 transition-all"
+                                                    style={{ width: `${uploadProgress}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        className="hidden"
+                                        onChange={handleFileChange}
+                                        accept={formData.type === 'video'
+                                            ? 'video/*'
+                                            : formData.type === 'document'
+                                                ? '.pdf,.doc,.docx,.ppt,.pptx,.txt'
+                                                : 'image/*'}
+                                    />
                                 </div>
                             </div>
                         </div>
